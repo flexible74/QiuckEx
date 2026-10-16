@@ -1580,10 +1580,11 @@ impl QuickexContract {
         escrow::is_refund_eligible(&env, commitment)
     }
 
-    /// Verify withdrawal parameters without submitting a transaction (read-only).
+    /// Pre-flight check whether a withdrawal is eligible to proceed (read-only).
     ///
-    /// Recomputes the commitment from `amount`, `salt`, and `owner`, then checks that an
-    /// escrow exists with status `Pending`, matching amount, and not yet expired.
+    /// Returns true only when the escrow is pending and unexpired under the withdrawal
+    /// rules, `amount` matches `amount_due`, and it is fully funded (`amount_paid >=
+    /// amount_due`). The funding check mirrors [`escrow::withdraw_item`].
     ///
     /// # Arguments
     /// * `env` - The contract environment
@@ -1612,7 +1613,7 @@ impl QuickexContract {
                 if e.expires_at > 0 && env.ledger().timestamp() >= e.expires_at {
                     return false;
                 }
-                e.amount_due == amount
+                e.amount_due == amount && e.amount_paid >= e.amount_due
             }
             None => false,
         }
