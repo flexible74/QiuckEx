@@ -1617,6 +1617,37 @@ fn test_verify_proof_view_valid() {
 }
 
 #[test]
+fn test_verify_proof_view_underfunded_escrow_returns_false() {
+    let (env, client) = setup();
+    let token = create_test_token(&env);
+    let owner = Address::generate(&env);
+    let amount_due: i128 = 1000;
+    let initial_payment: i128 = 500;
+    let salt = Bytes::from_slice(&env, b"underfunded_proof_salt");
+
+    token::StellarAssetClient::new(&env, &token).mint(&owner, &initial_payment);
+    let commitment = client.deposit_partial(
+        &token,
+        &amount_due,
+        &initial_payment,
+        &owner,
+        &salt,
+        &0,
+        &None,
+        &0u64,
+        &u64::MAX,
+    );
+
+    let details = client.get_escrow_details(&commitment, &owner).unwrap();
+    assert_eq!(details.amount_due, Some(amount_due));
+    assert_eq!(details.amount_paid, Some(initial_payment));
+    assert_eq!(details.status, EscrowStatus::Pending);
+    assert_eq!(details.expires_at, 0);
+
+    assert!(!client.verify_proof_view(&amount_due, &salt, &owner));
+}
+
+#[test]
 fn test_verify_proof_view_wrong_amount() {
     let (env, client) = setup();
     let token = create_test_token(&env);
