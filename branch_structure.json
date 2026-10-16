@@ -1,0 +1,18 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "fix/issue-1172-contract-error-codes-are-increasingly",
+    "main",
+    "origin"
+  ],
+  "parent": {
+    "fix/issue-1172-contract-error-codes-are-increasingly": "main",
+    "main": null,
+    "origin": "main"
+  },
+  "order": [
+    "main",
+    "fix/issue-1172-contract-error-codes-are-increasingly",
+    "origin"
+  ]
+}
